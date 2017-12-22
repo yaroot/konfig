@@ -12,14 +12,14 @@ lazy val konfig = project
   .settings(name := "konfig")
   .settings(commonSettings)
   .settings(coreDependencies)
-  .settings(wartSettings)
+  // .settings(wartSettings)
   .settings(publishSettings)
 
 lazy val `konfig-twitter-util` = project
   .settings(name := "konfig-twitter-util")
   .settings(commonSettings)
   .settings(twitterUtilDependencies)
-  .settings(wartSettings)
+  // .settings(wartSettings)
   .settings(publishSettings)
   .dependsOn(konfig)
 
@@ -52,26 +52,26 @@ libraryDependencies in Global ++= Seq(
 
 lazy val coreDependencies = Seq(
   libraryDependencies ++= Seq(
-    "com.typesafe"        %   "config"        % "1.3.1",
+    "com.typesafe"        %   "config"        % "1.3.2",
     "com.chuusai"         %%  "shapeless"     % "2.3.2"
   )
 )
 
 lazy val twitterUtilDependencies = Seq(
   libraryDependencies ++= Seq(
-    "com.twitter"   %% "util-core"  % "7.0.0"
+    "com.twitter"   %% "util-core"  % "17.12.0"
   )
 )
 
-lazy val wartSettings = Seq(
-  wartremoverErrors := Warts.allBut()
-)
+// lazy val wartSettings = Seq(
+//   wartremoverErrors := Warts.allBut()
+// )
 
 lazy val publishSettings = Seq(
   licenses                += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")),
-  bintrayRepository       := "maven",
-  bintrayOrganization     := Some("quadas"),
-  bintrayReleaseOnPublish := false,
+  // bintrayRepository       := "maven",
+  // bintrayOrganization     := Some("quadas"),
+  // bintrayReleaseOnPublish := false,
 
   pomExtra := {
     <url>https://github.com/quadas/konfig</url>
