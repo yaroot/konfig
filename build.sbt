@@ -12,14 +12,14 @@ lazy val konfig = project
   .settings(name := "konfig")
   .settings(commonSettings)
   .settings(coreDependencies)
-  // .settings(wartSettings)
+  .settings(wartSettings)
   .settings(publishSettings)
 
 lazy val `konfig-twitter-util` = project
   .settings(name := "konfig-twitter-util")
   .settings(commonSettings)
   .settings(twitterUtilDependencies)
-  // .settings(wartSettings)
+  .settings(wartSettings)
   .settings(publishSettings)
   .dependsOn(konfig)
 
@@ -63,9 +63,9 @@ lazy val twitterUtilDependencies = Seq(
   )
 )
 
-// lazy val wartSettings = Seq(
-//   wartremoverErrors := Warts.allBut()
-// )
+lazy val wartSettings = Seq(
+  wartremoverErrors := Warts.allBut()
+)
 
 lazy val publishSettings = Seq(
   licenses                += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")),
