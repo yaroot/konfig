@@ -1,9 +1,9 @@
 package com.quadas
 
 import com.typesafe.config.{ Config, ConfigMemorySize }
-import shapeless._
-import shapeless.labelled.{ FieldType, field }
+import magnolia._
 
+import scala.language.experimental.macros
 import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
 import scala.concurrent.duration._
@@ -19,11 +19,11 @@ package konfig {
   }
 
   object ConfigReader {
-    def of[T](f: (Config, String) => T) = new ConfigReader[T] {
+    def of[T](f: (Config, String) => T): ConfigReader[T] = new ConfigReader[T] {
       def read(c: Config, path: String): T = f(c, path)
     }
 
-    def fromString[T](f: String => T) = new ConfigReader[T] {
+    def fromString[T](f: String => T): ConfigReader[T] = new ConfigReader[T] {
       def read(c: Config, path: String): T = f(c.getString(path))
     }
 
@@ -64,57 +64,6 @@ package konfig {
   }
 
   trait ProductReaders {
-    implicit val hNilReader = new ConfigReader[HNil] {
-      override def read(c: Config, path: String) = HNil
-    }
-
-    implicit def hListReader[Key <: Symbol, Head, Tail <: HList](
-      implicit
-      key: Witness.Aux[Key],
-      keyStyle: KeyStyle,
-      cr: Lazy[ConfigReader[Head]],
-      tail: ConfigReader[Tail]
-    ): ConfigReader[FieldType[Key, Head] :: Tail] = new ConfigReader[FieldType[Key, Head] :: Tail] {
-      override def read(c: Config, path: String): FieldType[Key, Head] :: Tail = {
-        val v = cr.value.read(c.getConfig(path), keyStyle.style(key.value.name))
-        field[Key](v) :: tail.read(c, path)
-      }
-    }
-
-    implicit val cNilReader = new ConfigReader[CNil] {
-      import com.typesafe.config.ConfigException
-      override def read(c: Config, path: String): CNil = throw new ConfigException.Generic("no matching subtype, please specify one")
-    }
-
-    implicit def coproductReader[Key <: Symbol, Head, Tail <: Coproduct](
-      implicit
-      key: Witness.Aux[Key],
-      subtypeHint: SubtypeHint,
-      cr: Lazy[ConfigReader[Head]],
-      tail: ConfigReader[Tail]
-    ): ConfigReader[FieldType[Key, Head] :+: Tail] = new ConfigReader[FieldType[Key, Head] :+: Tail] {
-      override def read(c: Config, path: String): FieldType[Key, Head] :+: Tail = {
-        val subTypeValue = c.getConfig(path).getString(subtypeHint.fieldName())
-        if (subtypeHint.matchType(subTypeValue, key.value.name)) {
-          Inl(field[Key](cr.value.read(c, path)))
-        } else {
-          Inr(tail.read(c, path))
-        }
-      }
-    }
-
-    implicit def productReader[T, Repr](
-      implicit
-      gen: LabelledGeneric.Aux[T, Repr],
-      cr: Cached[Strict[ConfigReader[Repr]]]
-    ): ConfigReader[T] = new ConfigReader[T] {
-      override def read(c: Config, path: String): T = {
-        gen.from(cr.value.value.read(c, path))
-      }
-    }
-  }
-
-  trait StandardReaders {
     implicit val stringReader: ConfigReader[String] = ConfigReader.fromString(identity)
 
     implicit val intReader: ConfigReader[Int] = ConfigReader.of(_.getInt(_))
@@ -176,10 +125,77 @@ package konfig {
         override def read(c: Config, path: String): Try[T] = Try(cr.read(c, path))
       }
     }
+
+    //    implicit val hNilReader = new ConfigReader[HNil] {
+    //      override def read(c: Config, path: String) = HNil
+    //    }
+    //
+    //    implicit def hListReader[Key <: Symbol, Head, Tail <: HList](
+    //      implicit
+    //      key: Witness.Aux[Key],
+    //      keyStyle: KeyStyle,
+    //      cr: Lazy[ConfigReader[Head]],
+    //      tail: ConfigReader[Tail]): ConfigReader[FieldType[Key, Head] :: Tail] = new ConfigReader[FieldType[Key, Head] :: Tail] {
+    //      override def read(c: Config, path: String): FieldType[Key, Head] :: Tail = {
+    //        val v = cr.value.read(c.getConfig(path), keyStyle.style(key.value.name))
+    //        field[Key](v) :: tail.read(c, path)
+    //      }
+    //    }
+    //
+    //    implicit val cNilReader = new ConfigReader[CNil] {
+    //      import com.typesafe.config.ConfigException
+    //      override def read(c: Config, path: String): CNil = throw new ConfigException.Generic("no matching subtype, please specify one")
+    //    }
+    //
+    //    implicit def coproductReader[Key <: Symbol, Head, Tail <: Coproduct](
+    //      implicit
+    //      key: Witness.Aux[Key],
+    //      subtypeHint: SubtypeHint,
+    //      cr: Lazy[ConfigReader[Head]],
+    //      tail: ConfigReader[Tail]): ConfigReader[FieldType[Key, Head] :+: Tail] = new ConfigReader[FieldType[Key, Head] :+: Tail] {
+    //      override def read(c: Config, path: String): FieldType[Key, Head] :+: Tail = {
+    //        val subTypeValue = c.getConfig(path).getString(subtypeHint.fieldName())
+    //        if (subtypeHint.matchType(subTypeValue, key.value.name)) {
+    //          Inl(field[Key](cr.value.read(c, path)))
+    //        } else {
+    //          Inr(tail.read(c, path))
+    //        }
+    //      }
+    //    }
+    //
+    //    implicit def productReader[T, Repr](
+    //      implicit
+    //      gen: LabelledGeneric.Aux[T, Repr],
+    //      cr: Cached[Strict[ConfigReader[Repr]]]): ConfigReader[T] = new ConfigReader[T] {
+    //      override def read(c: Config, path: String): T = {
+    //        gen.from(cr.value.value.read(c, path))
+    //      }
+    //    }
+
+    type Typeclass[T] = ConfigReader[T]
+
+    def combine[T](caseClass: CaseClass[Typeclass, T]): Typeclass[T] = new ConfigReader[T] {
+      override def read(c: Config, path: String): T = {
+        caseClass.construct { x => x.typeclass.read(c.getConfig(path), x.label) }
+      }
+    }
+
+    def dispatch[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] = new ConfigReader[T] {
+      override def read(c: Config, path: String): T = {
+        val _typehint = c.getConfig(path).getString("type")
+        sealedTrait.subtypes.find(_.label.split('.').last.startsWith(_typehint))
+          .head.typeclass.read(c, path)
+      }
+    }
+
+    implicit def gen[T]: Typeclass[T] = macro Magnolia.gen[T]
+  }
+
+  trait StandardReaders {
   }
 
   trait DeriveConfigReaders {
-    def deriveConfigReader[T](implicit cr: Lazy[konfig.ConfigReader[T]]): konfig.ConfigReader[T] = cr.value
+    def deriveConfigReader[T](implicit cr: konfig.ConfigReader[T]): konfig.ConfigReader[T] = cr
   }
 
   trait ValueConverter[T] {

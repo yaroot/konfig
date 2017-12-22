@@ -7,18 +7,15 @@ object Config {
     kafka: ProducerConfig,
     http: WebServerConfig,
     admin: WebServerConfig,
-    db: DatabaseConfig
-  )
+    db: DatabaseConfig)
 
   case class ProducerConfig(
     topic: String,
-    properties: Map[String, String]
-  )
+    properties: Map[String, String])
 
   case class WebServerConfig(
     host: Option[String],
-    port: Int
-  )
+    port: Int)
 
   sealed trait DatabaseConfig
   case class PostgresConfig(connStr: String, db: String) extends DatabaseConfig
