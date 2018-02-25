@@ -1,6 +1,6 @@
-# Konfig [![Travis](https://img.shields.io/travis/quadas/konfig.svg?style=flat-square)](https://travis-ci.org/quadas/konfig)
+# Konfig [![Travis](https://img.shields.io/travis/yaroot/konfig.svg?style=flat-square)](https://travis-ci.org/yaroot/konfig)
 
-A scala helper library for [typesafe config](https://github.com/typesafehub/config)
+A scala helper library for [typesafe config](https://github.com/lightbend/config)
 
 ```
 libraryDependencies += "com.quadas" %% "konfig" % "0.1-M8"
