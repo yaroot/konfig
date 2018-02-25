@@ -47,19 +47,19 @@ lazy val commonSettings = Seq(
 
 libraryDependencies in Global ++= Seq(
   "org.scalacheck"      %%  "scalacheck"    % "1.13.5" % "test",
-  "org.scalatest"       %%  "scalatest"     % "3.0.4" % "test"
+  "org.scalatest"       %%  "scalatest"     % "3.0.5" % "test"
 )
 
 lazy val coreDependencies = Seq(
   libraryDependencies ++= Seq(
-    "com.typesafe"        %   "config"        % "1.3.2",
-    "com.chuusai"         %%  "shapeless"     % "2.3.2"
+    "com.typesafe"        %   "config"        % "1.3.3",
+    "com.chuusai"         %%  "shapeless"     % "2.3.3"
   )
 )
 
 lazy val twitterUtilDependencies = Seq(
   libraryDependencies ++= Seq(
-    "com.twitter"   %% "util-core"  % "17.12.0"
+    "com.twitter"   %% "util-core"  % "18.2.0"
   )
 )
 

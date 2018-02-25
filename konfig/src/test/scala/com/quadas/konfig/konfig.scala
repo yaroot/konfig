@@ -15,8 +15,7 @@ class KonfigTest extends FlatSpec with Matchers with Checkers {
     database: Database,
     ssl: Boolean,
     sslProtocols: List[String],
-    listenPort: Option[Int]
-  )
+    listenPort: Option[Int])
 
   def parseConfig(c: String): Config = ConfigFactory.parseString(c)
   implicit val arbiStr = Arbitrary(Gen.alphaStr)
@@ -30,8 +29,7 @@ class KonfigTest extends FlatSpec with Matchers with Checkers {
           Postgres(h, port),
           ssl,
           protos,
-          Some(listenPort)
-        )
+          Some(listenPort))
         val protoStr = if (protos.isEmpty) "[]" else protos.mkString("[\"", "\",\"", "\"]")
         val conf = parseConfig(
           s"""
@@ -45,8 +43,7 @@ class KonfigTest extends FlatSpec with Matchers with Checkers {
               ssl-protocols = $protoStr
               listen-port = $listenPort
             }
-          """
-        )
+          """)
         val parsed = conf.read[App]("app")
         parsed == app
     })
@@ -90,15 +87,13 @@ class KonfigSpec extends FlatSpec with Matchers {
         |  a.e.f.g = 2
         |  a.j.k.l = ppp
         |}
-      """.stripMargin
-    )
+      """.stripMargin)
       .read[Map[String, String]]("m") should be(Map(
         "aaa" -> "bbb",
         "ccc.ddd" -> "eee.fff",
         "a.b.c" -> "1",
         "a.e.f.g" -> "2",
-        "a.j.k.l" -> "ppp"
-      ))
+        "a.j.k.l" -> "ppp"))
 
     ConfigFactory.parseString("b = [ 1, 2, 3 ]")
       .read[List[Int]]("b") should be(List(1, 2, 3))
