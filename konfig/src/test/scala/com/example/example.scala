@@ -3,19 +3,11 @@ package com.example
 import com.typesafe.config.ConfigFactory
 
 object Config {
-  case class AppConfig(
-    kafka: ProducerConfig,
-    http: WebServerConfig,
-    admin: WebServerConfig,
-    db: DatabaseConfig)
+  case class AppConfig(kafka: ProducerConfig, http: WebServerConfig, admin: WebServerConfig, db: DatabaseConfig)
 
-  case class ProducerConfig(
-    topic: String,
-    properties: Map[String, String])
+  case class ProducerConfig(topic: String, properties: Map[String, String])
 
-  case class WebServerConfig(
-    host: Option[String],
-    port: Int)
+  case class WebServerConfig(host: Option[String], port: Int)
 
   sealed trait DatabaseConfig
   case class PostgresConfig(connStr: String, db: String) extends DatabaseConfig

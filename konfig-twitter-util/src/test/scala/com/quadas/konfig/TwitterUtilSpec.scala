@@ -2,9 +2,9 @@ package com.quadas.konfig
 
 import com.twitter.conversions.time._
 import com.twitter.conversions.storage._
-import com.twitter.util.{ Duration, StorageUnit }
+import com.twitter.util.{Duration, StorageUnit}
 import com.typesafe.config.ConfigFactory
-import org.scalatest.{ Matchers, WordSpecLike }
+import org.scalatest.{Matchers, WordSpecLike}
 
 import com.quadas.konfig.twitterutil._
 

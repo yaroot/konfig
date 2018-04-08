@@ -1,6 +1,6 @@
 package com.quadas.konfig
 
-import com.twitter.util.{ Duration, StorageUnit }
+import com.twitter.util.{Duration, StorageUnit}
 import com.typesafe.config.Config
 
 trait TwitterUtilReaders {

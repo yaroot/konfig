@@ -2,7 +2,7 @@ language: scala
 jdk:
 - oraclejdk8
 script:
-- sbt +test
+- sbt +scalafmtCheck +scalafmtTest +test:scalafmtCheck +test
 cache:
   directories:
   - "$HOME/.ivy2"

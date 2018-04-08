@@ -1,8 +1,8 @@
 package com.quadas
 
-import com.typesafe.config.{ Config, ConfigMemorySize }
+import com.typesafe.config.{Config, ConfigMemorySize}
 import shapeless._
-import shapeless.labelled.{ FieldType, field }
+import shapeless.labelled.{FieldType, field}
 
 import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
@@ -73,7 +73,8 @@ package konfig {
       key: Witness.Aux[Key],
       keyStyle: KeyStyle,
       cr: Lazy[ConfigReader[Head]],
-      tail: ConfigReader[Tail]): ConfigReader[FieldType[Key, Head] :: Tail] = new ConfigReader[FieldType[Key, Head] :: Tail] {
+      tail: ConfigReader[Tail]
+    ): ConfigReader[FieldType[Key, Head] :: Tail] = new ConfigReader[FieldType[Key, Head] :: Tail] {
       override def read(c: Config, path: String): FieldType[Key, Head] :: Tail = {
         val v = cr.value.read(c.getConfig(path), keyStyle.style(key.value.name))
         field[Key](v) :: tail.read(c, path)
@@ -82,7 +83,8 @@ package konfig {
 
     implicit val cNilReader = new ConfigReader[CNil] {
       import com.typesafe.config.ConfigException
-      override def read(c: Config, path: String): CNil = throw new ConfigException.Generic("no matching subtype, please specify one")
+      override def read(c: Config, path: String): CNil =
+        throw new ConfigException.Generic("no matching subtype, please specify one")
     }
 
     implicit def coproductReader[Key <: Symbol, Head, Tail <: Coproduct](
@@ -90,7 +92,8 @@ package konfig {
       key: Witness.Aux[Key],
       subtypeHint: SubtypeHint,
       cr: Lazy[ConfigReader[Head]],
-      tail: ConfigReader[Tail]): ConfigReader[FieldType[Key, Head] :+: Tail] = new ConfigReader[FieldType[Key, Head] :+: Tail] {
+      tail: ConfigReader[Tail]
+    ): ConfigReader[FieldType[Key, Head] :+: Tail] = new ConfigReader[FieldType[Key, Head] :+: Tail] {
       override def read(c: Config, path: String): FieldType[Key, Head] :+: Tail = {
         val subTypeValue = c.getConfig(path).getString(subtypeHint.fieldName())
         if (subtypeHint.matchType(subTypeValue, key.value.name)) {
@@ -104,7 +107,8 @@ package konfig {
     implicit def productReader[T, Repr](
       implicit
       gen: LabelledGeneric.Aux[T, Repr],
-      cr: Cached[Strict[ConfigReader[Repr]]]): ConfigReader[T] = new ConfigReader[T] {
+      cr: Cached[Strict[ConfigReader[Repr]]]
+    ): ConfigReader[T] = new ConfigReader[T] {
       override def read(c: Config, path: String): T = {
         gen.from(cr.value.value.read(c, path))
       }
@@ -138,16 +142,18 @@ package konfig {
           val co = c.getConfig(path)
           co.entrySet()
             .asScala
-            .map {
-              ent =>
-                ent.getKey -> ConfigReader.flat(ent.getValue, cr)
+            .map { ent =>
+              ent.getKey -> ConfigReader.flat(ent.getValue, cr)
             }
             .toMap
         }
       }
     }
 
-    implicit def listReader[C[_], T](implicit cr: ConfigReader[T], cbf: CanBuildFrom[C[T], T, C[T]]): ConfigReader[C[T]] = {
+    implicit def listReader[C[_], T](
+      implicit cr: ConfigReader[T],
+      cbf: CanBuildFrom[C[T], T, C[T]]
+    ): ConfigReader[C[T]] = {
       new ConfigReader[C[T]] {
         override def read(c: Config, path: String): C[T] = {
           c.getList(path)
@@ -200,7 +206,7 @@ package konfig {
         override def toConfigValue(t: Option[T]): ConfigValue = {
           t match {
             case Some(t0) => implicitly[ValueConverter[T]].toConfigValue(t0)
-            case _ => null
+            case _        => null
           }
         }
       }
@@ -228,7 +234,8 @@ package object konfig extends ProductReaders with StandardReaders with DeriveCon
   implicit object subtypeHint extends SubtypeHint {
     val LOCALE = java.util.Locale.US
     override def fieldName(): String = "type"
-    override def matchType(fieldValue: String, typeName: String): Boolean = typeName.toLowerCase(LOCALE).startsWith(fieldValue.toLowerCase(LOCALE))
+    override def matchType(fieldValue: String, typeName: String): Boolean =
+      typeName.toLowerCase(LOCALE).startsWith(fieldValue.toLowerCase(LOCALE))
   }
 
   implicit class EnrichedConfig(private val underlying: Config) extends AnyVal {
