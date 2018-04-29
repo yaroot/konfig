@@ -3,6 +3,7 @@ package com.quadas.konfig
 import scala.concurrent.duration._
 
 import com.typesafe.config.{Config, ConfigFactory}
+import cats.syntax.validated._
 import org.scalacheck._
 import org.scalatest.prop.Checkers
 import org.scalatest.{FlatSpec, Matchers}
@@ -35,11 +36,11 @@ class KonfigTest extends FlatSpec with Matchers with Checkers {
             }
           """)
       val parsed = conf.read[App]("app")
-      parsed == app
+      parsed.exists(_ == app)
     })
   }
 
-  "hyphen style key conversion" should "work" in {
+  "hyphen style key conversion" should "not contain upper case letter" in {
     check(Prop.forAll { (a: String) =>
       KeyStyle.Hyphen.style(a).filter(_.isUpper).isEmpty
     })
@@ -62,7 +63,7 @@ class KeyStyleCustomizableSpec extends FlatSpec with Matchers {
   "Keystyle" should "be customizable" in {
     ConfigFactory
       .parseString("t { ABCDEF = \"aaaa\" }")
-      .read[T]("t") should be(T("aaaa"))
+      .read[T]("t") should be(T("aaaa").validNel)
   }
 }
 
@@ -79,36 +80,36 @@ class KonfigSpec extends FlatSpec with Matchers {
         |}
       """.stripMargin)
       .read[Map[String, String]]("m") should be(
-      Map("aaa" -> "bbb", "ccc.ddd" -> "eee.fff", "a.b.c" -> "1", "a.e.f.g" -> "2", "a.j.k.l" -> "ppp")
+      Map("aaa" -> "bbb", "ccc.ddd" -> "eee.fff", "a.b.c" -> "1", "a.e.f.g" -> "2", "a.j.k.l" -> "ppp").validNel
     )
 
     ConfigFactory
       .parseString("b = [ 1, 2, 3 ]")
-      .read[List[Int]]("b") should be(List(1, 2, 3))
+      .read[List[Int]]("b") should be(List(1, 2, 3).validNel)
 
     ConfigFactory
       .parseString("b = [ 1, 2, 3 ]")
-      .read[Set[Int]]("b") should be(Set(1, 2, 3))
+      .read[Set[Int]]("b") should be(Set(1, 2, 3).validNel)
 
     ConfigFactory
       .parseString("b = [ 1, 2, 3 ]")
-      .read[Vector[Int]]("b") should be(Vector(1, 2, 3))
+      .read[Vector[Int]]("b") should be(Vector(1, 2, 3).validNel)
 
     ConfigFactory
       .parseString("n = 3.14159265358979323846264338327950288")
-      .read[BigDecimal]("n") should be(BigDecimal("3.14159265358979323846264338327950288"))
+      .read[BigDecimal]("n") should be(BigDecimal("3.14159265358979323846264338327950288").validNel)
 
     ConfigFactory
       .parseString("f = 2.71828182846")
-      .read[Double]("f") should be(2.71828182846)
+      .read[Double]("f") should be(2.71828182846.validNel)
 
     ConfigFactory
       .parseString("d = 5 day")
-      .read[FiniteDuration]("d") should be(5.days)
+      .read[FiniteDuration]("d") should be(5.days.validNel)
 
     ConfigFactory
       .parseString("a = 3s")
-      .read[Map[String, FiniteDuration]]() should be(Map("a" -> 3.seconds))
+      .read[Map[String, FiniteDuration]]() should be(Map("a" -> 3.seconds).validNel)
   }
 }
 
@@ -118,9 +119,7 @@ class FlatReaderSpec extends FlatSpec with Matchers {
   "feature" should "work" in {
     val reader = deriveConfigReader[Foo]
     val c = ConfigFactory.parseString("bar = 5")
-    ConfigReader.flat(c, reader).bar should be(5)
-
-    ConfigReader.mkFlat(reader).read(c, "*(%#@(&^(").bar should be(5)
+    c.read[Int]("bar") should be(5.validNel)
   }
 }
 

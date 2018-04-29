@@ -1,21 +1,19 @@
 package com.quadas.konfig
 
-import com.typesafe.config.{Config, ConfigException}
+import com.typesafe.config.Config
 import eu.timepit.refined.api.{RefType, Validate}
+import shapeless.Lazy
 
 trait RefinedReaders {
   implicit def refinedReader[T, P, F[_, _]](
     implicit
-    reader: ConfigReader[T],
+    reader: Lazy[ConfigReader[T]],
     validate: Validate[T, P],
     refType: RefType[F]
-  ): ConfigReader[F[T, P]] = new ConfigReader[F[T, P]] {
-    override def read(c: Config, path: String): F[T, P] = {
-      val result = reader.read(c, path)
-      refType.refine(result) match {
-        case Left(err) => throw new ConfigException.Generic(s"$path: $err")
-        case Right(x)  => x
-      }
+  ): ConfigReader[F[T, P]] = (c: Config, path: String) => {
+    val result = reader.value.read(c, path)
+    result.andThen { value =>
+      refType.refine(value).fold(KonfigResult.error(_), KonfigResult.success(_))
     }
   }
 }

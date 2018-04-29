@@ -1,7 +1,7 @@
 organization in Global := "com.quadas"
 name in Global := "konfig"
-scalaVersion in Global := "2.12.5"
-crossScalaVersions in Global := Seq("2.11.12", "2.12.5")
+scalaVersion in Global := "2.12.6"
+crossScalaVersions in Global := Seq(scalaVersion.value)
 
 lazy val root = project
   .in(file("."))
@@ -52,8 +52,10 @@ libraryDependencies in Global ++= Seq(
 
 lazy val coreDependencies = Seq(
   libraryDependencies ++= Seq(
-    "com.typesafe" % "config"     % "1.3.3",
-    "com.chuusai"  %% "shapeless" % "2.3.3"
+    "com.typesafe"  % "config"     % "1.3.3",
+    "com.chuusai"   %% "shapeless" % "2.3.3",
+    "org.typelevel" %% "cats-core" % "1.1.0",
+    "org.typelevel" %% "kittens"   % "1.0.0-RC3"
   )
 )
 

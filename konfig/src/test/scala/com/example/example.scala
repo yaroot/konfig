@@ -2,7 +2,7 @@ package com.example
 
 import com.typesafe.config.ConfigFactory
 
-object Config {
+object example {
   case class AppConfig(kafka: ProducerConfig, http: WebServerConfig, admin: WebServerConfig, db: DatabaseConfig)
 
   case class ProducerConfig(topic: String, properties: Map[String, String])

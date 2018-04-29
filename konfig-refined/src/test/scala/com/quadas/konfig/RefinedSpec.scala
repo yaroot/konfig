@@ -1,6 +1,7 @@
 package com.quadas.konfig
 
-import com.typesafe.config.{ConfigException, ConfigFactory}
+import cats.syntax.validated._
+import com.typesafe.config.ConfigFactory
 import eu.timepit.refined._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.boolean._
@@ -16,17 +17,17 @@ class RefinedSpec extends FlatSpec with Matchers {
   case class Port(value: Int Refined PortNumber)
 
   "Refined Reader" should "work with `refineV`" in {
-    ConfigFactory.parseString("value = 0").read[Port] should be(Port(refineMV[PortNumber](0)))
-    ConfigFactory.parseString("value = 65535").read[Port] should be(Port(refineMV[PortNumber](65535)))
-    an[ConfigException] should be thrownBy ConfigFactory.parseString("port { value = -1 }").read[Port]
+    ConfigFactory.parseString("value = 0").read[Port] should be(Port(refineMV[PortNumber](0)).validNel)
+    ConfigFactory.parseString("value = 65535").read[Port] should be(Port(refineMV[PortNumber](65535)).validNel)
+    ConfigFactory.parseString("port { value = -1 }").read[Port].isInvalid should be(true)
   }
 
   type StartsWithA = StartsWith[W.`"a"`.T]
   "Refined Reader" should "work with `refineT`" in {
     ConfigFactory.parseString("foo = \"abc\"").read[String @@ StartsWithA]("foo") should be(
-      refineMT[StartsWithA]("abc")
+      refineMT[StartsWithA]("abc").validNel
     )
-    an[ConfigException] should be thrownBy ConfigFactory.parseString("foo = \"bar\"").read[String @@ StartsWithA]("foo")
+    ConfigFactory.parseString("foo = \"bar\"").read[String @@ StartsWithA]("foo").isInvalid should be(true)
   }
 
 }
