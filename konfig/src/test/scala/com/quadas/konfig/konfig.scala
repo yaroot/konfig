@@ -117,7 +117,7 @@ class FlatReaderSpec extends FlatSpec with Matchers {
   case class Foo(bar: Int)
 
   "feature" should "work" in {
-    val reader = deriveConfigReader[Foo]
+    val reader = deriveKonfigReader[Foo]
     val c = ConfigFactory.parseString("bar = 5")
     c.read[Int]("bar") should be(5.validNel)
   }

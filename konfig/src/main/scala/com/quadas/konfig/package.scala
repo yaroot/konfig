@@ -39,7 +39,7 @@ object KonfigResult {
   def fromTry[A](_try: Try[A], message: => String): KonfigResult[A] = _try.fold(error(message, _), success)
 }
 
-trait ConfigReader[T] {
+trait KonfigReader[T] {
   def read(c: Config, path: String): KonfigResult[T]
   def read(c: Config): KonfigResult[T] = {
     read(c.atKey("_"), "_")
@@ -49,11 +49,11 @@ trait ConfigReader[T] {
   }
 }
 
-object ConfigReader {
-  def of[T](f: (Config, String) => T): ConfigReader[T] =
+object KonfigReader {
+  def of[T](f: (Config, String) => T): KonfigReader[T] =
     (c: Config, path: String) => KonfigResult.fromTry(Try(f(c, path)), s"Failed to read $path")
 
-  def fromString[T](f: String => T): ConfigReader[T] =
+  def fromString[T](f: String => T): KonfigReader[T] =
     (c: Config, path: String) => KonfigResult.fromTry(Try(f(c.getString(path))), s"Failed to read $path")
 }
 
@@ -84,15 +84,15 @@ object KeyStyle {
 }
 
 trait ProductReaders {
-  implicit val hNilReader: ConfigReader[HNil] = (_: Config, _: String) => KonfigResult.success(HNil)
+  implicit val hNilReader: KonfigReader[HNil] = (_: Config, _: String) => KonfigResult.success(HNil)
 
   implicit def hListReader[Key <: Symbol, Head, Tail <: HList](
     implicit
     key: Witness.Aux[Key],
     keyStyle: KeyStyle,
-    cr: Lazy[ConfigReader[Head]],
-    tail: Lazy[ConfigReader[Tail]]
-  ): ConfigReader[FieldType[Key, Head] :: Tail] = (c: Config, path: String) => {
+    cr: Lazy[KonfigReader[Head]],
+    tail: Lazy[KonfigReader[Tail]]
+  ): KonfigReader[FieldType[Key, Head] :: Tail] = (c: Config, path: String) => {
     val value: KonfigResult[FieldType[Key, Head]] =
       cr.value
         .read(c.getConfig(path), keyStyle.style(key.value.name))
@@ -102,16 +102,16 @@ trait ProductReaders {
     Apply[KonfigResult].map2(value, tailVal)(_ :: _)
   }
 
-  implicit val cNilReader: ConfigReader[CNil] = (_: Config, _: String) =>
+  implicit val cNilReader: KonfigReader[CNil] = (_: Config, _: String) =>
     KonfigResult.error("Can't find a valid choice from all subtypes")
 
   implicit def coproductReader[Key <: Symbol, Head, Tail <: Coproduct](
     implicit
     key: Witness.Aux[Key],
     subtypeHint: SubtypeHint,
-    cr: Lazy[ConfigReader[Head]],
-    tail: Lazy[ConfigReader[Tail]]
-  ): ConfigReader[FieldType[Key, Head] :+: Tail] = (c: Config, path: String) => {
+    cr: Lazy[KonfigReader[Head]],
+    tail: Lazy[KonfigReader[Tail]]
+  ): KonfigReader[FieldType[Key, Head] :+: Tail] = (c: Config, path: String) => {
     val subtypeValue = c.getConfig(path).getString(subtypeHint.fieldName())
     if (subtypeHint.matchType(subtypeValue, key.value.name))
       cr.value.read(c, path).map(head => Inl(field[Key](head)))
@@ -122,34 +122,34 @@ trait ProductReaders {
   implicit def productReader[T, Repr](
     implicit
     gen: LabelledGeneric.Aux[T, Repr],
-    cr: Cached[Strict[ConfigReader[Repr]]]
-  ): ConfigReader[T] = (c: Config, path: String) => {
+    cr: Cached[Strict[KonfigReader[Repr]]]
+  ): KonfigReader[T] = (c: Config, path: String) => {
     cr.value.value.read(c, path).map(gen.from)
   }
 }
 
 trait StandardReaders {
-  implicit val stringReader: ConfigReader[String] = ConfigReader.fromString(identity)
+  implicit val stringReader: KonfigReader[String] = KonfigReader.fromString(identity)
 
-  implicit val intReader: ConfigReader[Int] = ConfigReader.of(_.getInt(_))
+  implicit val intReader: KonfigReader[Int] = KonfigReader.of(_.getInt(_))
 
-  implicit val longReader: ConfigReader[Long] = ConfigReader.of(_.getLong(_))
+  implicit val longReader: KonfigReader[Long] = KonfigReader.of(_.getLong(_))
 
-  implicit val booleanReader: ConfigReader[Boolean] = ConfigReader.of(_.getBoolean(_))
+  implicit val booleanReader: KonfigReader[Boolean] = KonfigReader.of(_.getBoolean(_))
 
-  implicit val floatReader: ConfigReader[Float] = ConfigReader.of(_.getDouble(_).toFloat)
+  implicit val floatReader: KonfigReader[Float] = KonfigReader.of(_.getDouble(_).toFloat)
 
-  implicit val doubleReader: ConfigReader[Double] = ConfigReader.of(_.getDouble(_))
+  implicit val doubleReader: KonfigReader[Double] = KonfigReader.of(_.getDouble(_))
 
-  implicit val bigDecimalReader: ConfigReader[BigDecimal] = ConfigReader.fromString(BigDecimal.apply)
+  implicit val bigDecimalReader: KonfigReader[BigDecimal] = KonfigReader.fromString(BigDecimal.apply)
 
-  implicit val finiteDurationReader: ConfigReader[FiniteDuration] = ConfigReader.of(_.getDuration(_).toNanos.nanos)
+  implicit val finiteDurationReader: KonfigReader[FiniteDuration] = KonfigReader.of(_.getDuration(_).toNanos.nanos)
 
-  implicit val memorySizeReader: ConfigReader[ConfigMemorySize] = ConfigReader.of(_.getMemorySize(_))
+  implicit val memorySizeReader: KonfigReader[ConfigMemorySize] = KonfigReader.of(_.getMemorySize(_))
 
-  implicit val configReader: ConfigReader[Config] = ConfigReader.of(_.getConfig(_))
+  implicit val configReader: KonfigReader[Config] = KonfigReader.of(_.getConfig(_))
 
-  implicit def strMapReader[T](implicit cr: ConfigReader[T]): ConfigReader[Map[String, T]] = {
+  implicit def strMapReader[T](implicit cr: KonfigReader[T]): KonfigReader[Map[String, T]] = {
     (c: Config, path: String) =>
       {
         c.getConfig(path)
@@ -165,8 +165,8 @@ trait StandardReaders {
   }
 
   implicit def vectorReader[T](
-    implicit cr: ConfigReader[T]
-  ): ConfigReader[Vector[T]] = (c: Config, path: String) => {
+    implicit cr: KonfigReader[T]
+  ): KonfigReader[Vector[T]] = (c: Config, path: String) => {
     val as: Vector[KonfigResult[T]] = c
       .getList(path)
       .asScala
@@ -175,13 +175,13 @@ trait StandardReaders {
     as.sequence
   }
 
-  implicit def listReader[T: ConfigReader]: ConfigReader[List[T]] =
+  implicit def listReader[T: KonfigReader]: KonfigReader[List[T]] =
     (c: Config, path: String) => vectorReader[T].read(c, path).map(_.toList)
 
-  implicit def setReader[T: ConfigReader]: ConfigReader[Set[T]] =
+  implicit def setReader[T: KonfigReader]: KonfigReader[Set[T]] =
     (c: Config, path: String) => vectorReader[T].read(c, path).map(_.toSet)
 
-  implicit def optionReader[T](implicit cr: ConfigReader[T]): ConfigReader[Option[T]] =
+  implicit def optionReader[T](implicit cr: KonfigReader[T]): KonfigReader[Option[T]] =
     (c: Config, path: String) => {
       if (c.hasPath(path)) {
         cr.read(c, path).map(Option.apply)
@@ -189,8 +189,8 @@ trait StandardReaders {
     }
 }
 
-trait DeriveConfigReaders {
-  def deriveConfigReader[T](implicit cr: Lazy[ConfigReader[T]]): ConfigReader[T] = cr.value
+trait DeriveKonfigReaders {
+  def deriveKonfigReader[T](implicit cr: Lazy[KonfigReader[T]]): KonfigReader[T] = cr.value
 }
 
 trait ValueConverter[T] {

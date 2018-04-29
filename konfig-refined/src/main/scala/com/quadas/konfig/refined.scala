@@ -7,10 +7,10 @@ import shapeless.Lazy
 trait RefinedReaders {
   implicit def refinedReader[T, P, F[_, _]](
     implicit
-    reader: Lazy[ConfigReader[T]],
+    reader: Lazy[KonfigReader[T]],
     validate: Validate[T, P],
     refType: RefType[F]
-  ): ConfigReader[F[T, P]] = (c: Config, path: String) => {
+  ): KonfigReader[F[T, P]] = (c: Config, path: String) => {
     val result = reader.value.read(c, path)
     result.andThen { value =>
       refType.refine(value).fold(KonfigResult.error(_), KonfigResult.success(_))

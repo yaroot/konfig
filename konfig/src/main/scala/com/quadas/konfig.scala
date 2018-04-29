@@ -5,7 +5,7 @@ import com.typesafe.config.Config
 
 import scala.language.higherKinds
 
-package object konfig extends ProductReaders with StandardReaders with DeriveConfigReaders {
+package object konfig extends ProductReaders with StandardReaders with DeriveKonfigReaders {
   type KonfigResult[A] = ValidatedNel[KonfigError, A]
 
   implicit val keyStyle: KeyStyle = KeyStyle.Hyphen
@@ -17,11 +17,11 @@ package object konfig extends ProductReaders with StandardReaders with DeriveCon
   }
 
   implicit class EnrichedConfig(private val underlying: Config) extends AnyVal {
-    def read[T](path: String)(implicit cr: ConfigReader[T]): KonfigResult[T] = {
+    def read[T](path: String)(implicit cr: KonfigReader[T]): KonfigResult[T] = {
       cr.read(underlying, path)
     }
 
-    def read[T]()(implicit cr: ConfigReader[T]): KonfigResult[T] = {
+    def read[T]()(implicit cr: KonfigReader[T]): KonfigResult[T] = {
       cr.read(underlying)
     }
 
