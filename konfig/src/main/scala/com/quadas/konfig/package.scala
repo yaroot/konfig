@@ -13,11 +13,9 @@ import scala.concurrent.duration._
 import scala.language.higherKinds
 import scala.util.Try
 
-// could be an exception, I'm lazy
 sealed trait KonfigError {
   def cause: Throwable
   def exception(): Throwable = new RuntimeException(toString, cause)
-  // TODO add useful combinators (like `map`)
 }
 
 object KonfigError {
@@ -47,6 +45,7 @@ trait KonfigReader[T] {
   def read(c: ConfigValue): KonfigResult[T] = {
     read(c.atKey("_"), "_")
   }
+  // TODO add useful combinators (like `map`)
 }
 
 object KonfigReader {
