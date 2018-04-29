@@ -13,7 +13,7 @@ trait RefinedReaders {
   ): KonfigReader[F[T, P]] = (c: Config, path: String) => {
     val result = reader.value.read(c, path)
     result.andThen { value =>
-      refType.refine(value).fold(KonfigResult.error(_), KonfigResult.success(_))
+      KonfigResult.fromEither(refType.refine(value))(KonfigError(_))
     }
   }
 }

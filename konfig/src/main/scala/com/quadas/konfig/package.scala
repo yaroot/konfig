@@ -33,6 +33,8 @@ object KonfigResult {
   def error[A](message: String): KonfigResult[A] = KonfigError(message).invalidNel
   def error[A](message: String, cause: Throwable): KonfigResult[A] = KonfigError(message, cause).invalidNel
   def error[A](cause: Throwable): KonfigResult[A] = KonfigError(cause).invalidNel
+  def fromEither[E, A](either: Either[E, A])(f: E => KonfigError): KonfigResult[A] =
+    either.fold(f(_).invalidNel, _.validNel)
   def fromTry[A](_try: Try[A]): KonfigResult[A] = _try.fold(error[A](_), success)
   def fromTry[A](_try: Try[A], message: => String): KonfigResult[A] = _try.fold(error(message, _), success)
 }
