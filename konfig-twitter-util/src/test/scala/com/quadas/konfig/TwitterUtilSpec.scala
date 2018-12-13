@@ -1,8 +1,8 @@
 package com.quadas.konfig
 
 import cats.syntax.validated._
-import com.twitter.conversions.time._
-import com.twitter.conversions.storage._
+import com.twitter.conversions.DurationOps._
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.util.{Duration, StorageUnit}
 import com.typesafe.config.ConfigFactory
 import org.scalatest.{Matchers, WordSpecLike}
