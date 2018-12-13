@@ -1,4 +1,4 @@
-package com.quadas.konfig
+package konfig
 
 import cats.Apply
 import cats.instances.all._

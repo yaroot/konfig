@@ -1,4 +1,4 @@
-package com.quadas.konfig
+package konfig
 
 import scala.concurrent.duration._
 

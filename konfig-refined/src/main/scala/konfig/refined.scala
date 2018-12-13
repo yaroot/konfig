@@ -1,4 +1,4 @@
-package com.quadas.konfig
+package konfig
 
 import com.typesafe.config.Config
 import eu.timepit.refined.api.{RefType, Validate}

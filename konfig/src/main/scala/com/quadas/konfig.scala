@@ -1,5 +1,3 @@
-package com.quadas
-
 import cats.data.ValidatedNel
 import com.typesafe.config.Config
 

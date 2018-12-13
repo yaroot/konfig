@@ -1,4 +1,4 @@
-package com.quadas.konfig
+package konfig
 
 import cats.syntax.validated._
 import com.typesafe.config.ConfigFactory
@@ -8,8 +8,8 @@ import eu.timepit.refined.boolean._
 import eu.timepit.refined.string._
 import eu.timepit.refined.numeric._
 import org.scalatest.{FlatSpec, Matchers}
-import com.quadas.konfig._
-import com.quadas.konfig.refined._
+import konfig._
+import konfig.refined._
 import shapeless.tag.@@
 
 class RefinedSpec extends FlatSpec with Matchers {

@@ -1,4 +1,4 @@
-package com.quadas.konfig
+package konfig
 
 import cats.syntax.validated._
 import com.twitter.util.{Duration, StorageUnit}

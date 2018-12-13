@@ -1,5 +1,3 @@
-package com.example
-
 import com.typesafe.config.ConfigFactory
 
 object example {
@@ -14,7 +12,7 @@ object example {
   case class MysqlConfig(connStr: String, db: String) extends DatabaseConfig
 
   def main(args: Array[String]): Unit = {
-    import com.quadas.konfig._
+    import konfig._
     println(ConfigFactory.load().resolve().read[AppConfig]("my-example-app"))
   }
 }
