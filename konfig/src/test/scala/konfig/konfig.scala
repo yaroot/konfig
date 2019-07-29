@@ -63,7 +63,7 @@ class KeyStyleCustomizableSpec extends FlatSpec with Matchers {
   "Keystyle" should "be customizable" in {
     ConfigFactory
       .parseString("t { ABCDEF = \"aaaa\" }")
-      .read[T]("t") should be(T("aaaa").validNel)
+      .read[T]("t") should be(T("aaaa").validNec)
   }
 }
 
@@ -80,36 +80,36 @@ class KonfigSpec extends FlatSpec with Matchers {
         |}
       """.stripMargin)
       .read[Map[String, String]]("m") should be(
-      Map("aaa" -> "bbb", "ccc.ddd" -> "eee.fff", "a.b.c" -> "1", "a.e.f.g" -> "2", "a.j.k.l" -> "ppp").validNel
+      Map("aaa" -> "bbb", "ccc.ddd" -> "eee.fff", "a.b.c" -> "1", "a.e.f.g" -> "2", "a.j.k.l" -> "ppp").validNec
     )
 
     ConfigFactory
       .parseString("b = [ 1, 2, 3 ]")
-      .read[List[Int]]("b") should be(List(1, 2, 3).validNel)
+      .read[List[Int]]("b") should be(List(1, 2, 3).validNec)
 
     ConfigFactory
       .parseString("b = [ 1, 2, 3 ]")
-      .read[Set[Int]]("b") should be(Set(1, 2, 3).validNel)
+      .read[Set[Int]]("b") should be(Set(1, 2, 3).validNec)
 
     ConfigFactory
       .parseString("b = [ 1, 2, 3 ]")
-      .read[Vector[Int]]("b") should be(Vector(1, 2, 3).validNel)
+      .read[Vector[Int]]("b") should be(Vector(1, 2, 3).validNec)
 
     ConfigFactory
       .parseString("n = 3.14159265358979323846264338327950288")
-      .read[BigDecimal]("n") should be(BigDecimal("3.14159265358979323846264338327950288").validNel)
+      .read[BigDecimal]("n") should be(BigDecimal("3.14159265358979323846264338327950288").validNec)
 
     ConfigFactory
       .parseString("f = 2.71828182846")
-      .read[Double]("f") should be(2.71828182846.validNel)
+      .read[Double]("f") should be(2.71828182846.validNec)
 
     ConfigFactory
       .parseString("d = 5 day")
-      .read[FiniteDuration]("d") should be(5.days.validNel)
+      .read[FiniteDuration]("d") should be(5.days.validNec)
 
     ConfigFactory
       .parseString("a = 3s")
-      .read[Map[String, FiniteDuration]]() should be(Map("a" -> 3.seconds).validNel)
+      .read[Map[String, FiniteDuration]]() should be(Map("a" -> 3.seconds).validNec)
   }
 }
 
@@ -119,7 +119,7 @@ class FlatReaderSpec extends FlatSpec with Matchers {
   "feature" should "work" in {
     val reader = deriveKonfigReader[Foo]
     val c = ConfigFactory.parseString("bar = 5")
-    c.read[Int]("bar") should be(5.validNel)
+    c.read[Int]("bar") should be(5.validNec)
   }
 }
 

@@ -17,15 +17,15 @@ class RefinedSpec extends FlatSpec with Matchers {
   case class Port(value: Int Refined PortNumber)
 
   "Refined Reader" should "work with `refineV`" in {
-    ConfigFactory.parseString("value = 0").read[Port] should be(Port(refineMV[PortNumber](0)).validNel)
-    ConfigFactory.parseString("value = 65535").read[Port] should be(Port(refineMV[PortNumber](65535)).validNel)
+    ConfigFactory.parseString("value = 0").read[Port] should be(Port(refineMV[PortNumber](0)).validNec)
+    ConfigFactory.parseString("value = 65535").read[Port] should be(Port(refineMV[PortNumber](65535)).validNec)
     ConfigFactory.parseString("port { value = -1 }").read[Port].isInvalid should be(true)
   }
 
   type StartsWithA = StartsWith[W.`"a"`.T]
   "Refined Reader" should "work with `refineT`" in {
     ConfigFactory.parseString("foo = \"abc\"").read[String @@ StartsWithA]("foo") should be(
-      refineMT[StartsWithA]("abc").validNel
+      refineMT[StartsWithA]("abc").validNec
     )
     ConfigFactory.parseString("foo = \"bar\"").read[String @@ StartsWithA]("foo").isInvalid should be(true)
   }

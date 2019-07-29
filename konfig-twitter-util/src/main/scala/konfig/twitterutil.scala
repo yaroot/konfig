@@ -6,11 +6,11 @@ import com.typesafe.config.Config
 
 trait TwitterUtilReaders {
   implicit val durationReader: KonfigReader[Duration] = (c: Config, path: String) => {
-    Duration.fromNanoseconds(c.getDuration(path).toNanos).validNel
+    Duration.fromNanoseconds(c.getDuration(path).toNanos).validNec
   }
 
   implicit val storageUnitReader: KonfigReader[StorageUnit] = (c: Config, path: String) => {
-    StorageUnit.fromBytes(c.getBytes(path)).validNel
+    StorageUnit.fromBytes(c.getBytes(path)).validNec
   }
 }
 
