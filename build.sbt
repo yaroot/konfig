@@ -1,7 +1,7 @@
 organization in Global := "com.quadas"
 name in Global := "konfig"
 scalaVersion in Global := "2.12.8"
-crossScalaVersions in Global := Seq(scalaVersion.value)
+crossScalaVersions in Global := Seq("2.12.8")
 
 lazy val root = project
   .in(file("."))
@@ -47,28 +47,28 @@ lazy val commonSettings = Seq(
 
 libraryDependencies in Global ++= Seq(
   "org.scalacheck" %% "scalacheck" % "1.14.0" % "test",
-  "org.scalatest"  %% "scalatest"  % "3.0.5"  % "test"
+  "org.scalatest"  %% "scalatest"  % "3.0.8"  % "test"
 )
 
 lazy val coreDependencies = Seq(
   libraryDependencies ++= Seq(
-    "com.typesafe"  % "config"     % "1.3.3",
+    "com.typesafe"  % "config"     % "1.3.4",
     "com.chuusai"   %% "shapeless" % "2.3.3",
-    "org.typelevel" %% "cats-core" % "1.5.0",
-    "org.typelevel" %% "kittens"   % "1.2.0"
+    "org.typelevel" %% "cats-core" % "1.6.1",
+    "org.typelevel" %% "kittens"   % "1.2.1"
   )
 )
 
 lazy val twitterUtilDependencies = Seq(
   libraryDependencies ++= Seq(
-    "com.twitter" %% "util-core" % "18.12.0"
+    "com.twitter" %% "util-core" % "19.7.0"
   )
 )
 
 lazy val refinedDependencies = Seq(
   libraryDependencies ++= Seq(
-    "eu.timepit" %% "refined"            % "0.9.3",
-    "eu.timepit" %% "refined-scalacheck" % "0.9.3" % Test
+    "eu.timepit" %% "refined"            % "0.9.9",
+    "eu.timepit" %% "refined-scalacheck" % "0.9.9" % Test
   )
 )
 
