@@ -1,10 +1,10 @@
-import cats.data.ValidatedNel
+import cats.data.ValidatedNec
 import com.typesafe.config.Config
 
 import scala.language.higherKinds
 
 package object konfig extends ProductReaders with StandardReaders with DeriveKonfigReaders {
-  type KonfigResult[A] = ValidatedNel[KonfigError, A]
+  type KonfigResult[A] = ValidatedNec[KonfigError, A]
 
   implicit val keyStyle: KeyStyle = KeyStyle.Hyphen
 

@@ -29,12 +29,12 @@ object KonfigError {
 }
 
 object KonfigResult {
-  def success[A](value: A): KonfigResult[A] = value.validNel
-  def error[A](message: String): KonfigResult[A] = KonfigError(message).invalidNel
-  def error[A](message: String, cause: Throwable): KonfigResult[A] = KonfigError(message, cause).invalidNel
-  def error[A](cause: Throwable): KonfigResult[A] = KonfigError(cause).invalidNel
+  def success[A](value: A): KonfigResult[A] = value.validNec
+  def error[A](message: String): KonfigResult[A] = KonfigError(message).invalidNec
+  def error[A](message: String, cause: Throwable): KonfigResult[A] = KonfigError(message, cause).invalidNec
+  def error[A](cause: Throwable): KonfigResult[A] = KonfigError(cause).invalidNec
   def fromEither[E, A](either: Either[E, A])(f: E => KonfigError): KonfigResult[A] =
-    either.fold(f(_).invalidNel, _.validNel)
+    either.fold(f(_).invalidNec, _.validNec)
   def fromTry[A](_try: Try[A]): KonfigResult[A] = _try.fold(error[A](_), success)
   def fromTry[A](_try: Try[A], message: => String): KonfigResult[A] = _try.fold(error(message, _), success)
 }
