@@ -1,7 +1,7 @@
 organization in Global := "com.quadas"
 name in Global := "konfig"
-scalaVersion in Global := "2.12.8"
-crossScalaVersions in Global := Seq("2.12.8")
+scalaVersion in Global := "2.12.11"
+crossScalaVersions in Global := Seq("2.12.11", "2.13.2")
 
 lazy val root = project
   .in(file("."))
@@ -33,47 +33,38 @@ lazy val `konfig-refined` = project
   .dependsOn(konfig)
 
 lazy val commonSettings = Seq(
-  scalacOptions := Seq(
-    "-unchecked",
-    "-deprecation",
-    "-encoding",
-    "utf8",
-    "-Ypartial-unification",
-    "-feature",
-    "-language:higherKinds"
-  ),
   scalafmtOnCompile := true
 )
 
 libraryDependencies in Global ++= Seq(
-  "org.scalacheck" %% "scalacheck" % "1.14.0" % "test",
-  "org.scalatest"  %% "scalatest"  % "3.0.8"  % "test"
+  "org.scalacheck" %% "scalacheck" % "1.14.3" % "test",
+  "org.scalatest"  %% "scalatest"  % "3.1.2"  % "test"
 )
 
 lazy val coreDependencies = Seq(
   libraryDependencies ++= Seq(
-    "com.typesafe"  % "config"     % "1.3.4",
+    "com.typesafe"  % "config"     % "1.4.0",
     "com.chuusai"   %% "shapeless" % "2.3.3",
-    "org.typelevel" %% "cats-core" % "1.6.1",
-    "org.typelevel" %% "kittens"   % "1.2.1"
+    "org.typelevel" %% "cats-core" % "2.1.1",
+    "org.typelevel" %% "kittens"   % "2.1.0"
   )
 )
 
 lazy val twitterUtilDependencies = Seq(
   libraryDependencies ++= Seq(
-    "com.twitter" %% "util-core" % "19.7.0"
+    "com.twitter" %% "util-core" % "20.5.0"
   )
 )
 
 lazy val refinedDependencies = Seq(
   libraryDependencies ++= Seq(
-    "eu.timepit" %% "refined"            % "0.9.9",
-    "eu.timepit" %% "refined-scalacheck" % "0.9.9" % Test
+    "eu.timepit" %% "refined"            % "0.9.14",
+    "eu.timepit" %% "refined-scalacheck" % "0.9.14" % Test
   )
 )
 
 lazy val wartSettings = Seq(
-  wartremoverErrors := Warts.allBut()
+  //wartremoverErrors := Warts.allBut()
 )
 
 lazy val publishSettings = Seq(

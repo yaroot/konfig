@@ -1,4 +1,4 @@
+*.iml
+.bloop/
 .idea/
 target/
-.ensime*
-*.iml
